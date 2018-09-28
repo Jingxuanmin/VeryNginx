@@ -60,6 +60,9 @@ function _M.filter()
                     response = response_list[rule['response']]
                     if response ~= nil then
                         ngx.header.content_type = response['content_type']
+                        ngx.header["X-Rate-Limit-Limit"] = time
+                        ngx.header["X-Rate-Limit-Remaining"] = count - count_now
+                        ngx.header["X-Rate-Limit-Reset"] = limit_dict:ttl(key)
                         ngx.say( response['body'] )
                     end
                     ngx.exit( ngx.HTTP_OK )
