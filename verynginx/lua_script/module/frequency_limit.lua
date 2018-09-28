@@ -53,16 +53,15 @@ function _M.filter()
             end
             
             limit_dict:incr( key, 1 )
-
+            ngx.header["X-Rate-Limit-Limit"] = time
+            ngx.header["X-Rate-Limit-Remaining"] = count - count_now
+            ngx.header["X-Rate-Limit-Reset"] = limit_dict:ttl(key)
             if count_now > tonumber(count) then
                 if rule['response'] ~= nil then
                     ngx.status = tonumber( rule['code'] )
                     response = response_list[rule['response']]
                     if response ~= nil then
                         ngx.header.content_type = response['content_type']
-                        ngx.header["X-Rate-Limit-Limit"] = time
-                        ngx.header["X-Rate-Limit-Remaining"] = count - count_now
-                        ngx.header["X-Rate-Limit-Reset"] = limit_dict:ttl(key)
                         ngx.say( response['body'] )
                     end
                     ngx.exit( ngx.HTTP_OK )
